@@ -9,6 +9,9 @@ export interface AccountInfo {
   seedId: number;
   index: number;
   label: string;
+  // Added by WalletManager.listAccounts while unlocked, since the coin type
+  // depends on the network. Never stored.
+  derivationPath?: string;
 }
 
 export interface ActiveAccount {

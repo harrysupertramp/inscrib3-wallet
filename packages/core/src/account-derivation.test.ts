@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { MnemonicIdentity } from '@arkade-os/sdk';
-import { deriveAccountDescriptor } from './account-derivation.js';
+import { HDKey } from '@bitcoinerlab/descriptors-scure';
+import { mnemonicToSeedSync } from '@scure/bip39';
+import { accountKeyPath, deriveAccountDescriptor } from './account-derivation.js';
 
 const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
@@ -67,4 +69,27 @@ describe('a second independent seed', () => {
     const hexKeys = keys.map((k) => Buffer.from(k).toString('hex'));
     expect(new Set(hexKeys).size).toBe(3);
   });
+});
+
+// The Accounts screen shows this path so the account can be restored in
+// another wallet; it must name the key the wallet really uses.
+describe('accountKeyPath', () => {
+  const cases = [
+    { isMainnet: true, accountIndex: 0, path: "m/86'/0'/0'/0/0" },
+    { isMainnet: true, accountIndex: 2, path: "m/86'/0'/2'/0/0" },
+    { isMainnet: false, accountIndex: 0, path: "m/86'/1'/0'/0/0" },
+    { isMainnet: false, accountIndex: 1, path: "m/86'/1'/1'/0/0" },
+  ];
+
+  for (const { isMainnet, accountIndex, path } of cases) {
+    test(`${path} is the key the wallet signs with`, async () => {
+      expect(accountKeyPath(isMainnet, accountIndex)).toBe(path);
+      const identity =
+        accountIndex === 0
+          ? MnemonicIdentity.fromMnemonic(TEST_MNEMONIC, { isMainnet })
+          : MnemonicIdentity.fromMnemonic(TEST_MNEMONIC, { descriptor: deriveAccountDescriptor(TEST_MNEMONIC, isMainnet, accountIndex) });
+      const keyAtPath = HDKey.fromMasterSeed(mnemonicToSeedSync(TEST_MNEMONIC)).derive(path).publicKey!.slice(1);
+      expect(await identity.xOnlyPublicKey()).toEqual(keyAtPath);
+    });
+  }
 });

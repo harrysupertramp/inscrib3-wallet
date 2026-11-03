@@ -45,7 +45,7 @@ import { IncomingFundsFilter, type IncomingFundsSummary } from './incoming-funds
 import { ExitService, type SerializableExitProgress } from './exit-service.js';
 import { AssetService, type AssetInfo } from './asset-service.js';
 import { toHistoryEntry, type TxHistoryEntry } from './tx-history.js';
-import { deriveAccountDescriptor } from './account-derivation.js';
+import { accountKeyPath, deriveAccountDescriptor } from './account-derivation.js';
 import {
   loadAccounts,
   saveAccounts,
@@ -818,7 +818,10 @@ export class WalletManager {
 
   // --- Accounts ---
   async listAccounts(): Promise<AccountInfo[]> {
-    return loadAccounts(this.store);
+    const accounts = await loadAccounts(this.store);
+    if (!this.network) return accounts;
+    const isMainnet = this.network === 'bitcoin';
+    return accounts.map((a) => ({ ...a, derivationPath: accountKeyPath(isMainnet, a.index) }));
   }
 
   async getActiveAccount(): Promise<ActiveAccount> {

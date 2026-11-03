@@ -175,7 +175,7 @@ async function confirmImportSeed() {
 
 <template>
   <section class="settings-view">
-    <p class="hint">Separate accounts, either derived from the same seed phrase or imported from an independent one.</p>
+    <p class="hint">Separate accounts, either derived from the same seed phrase or imported from an independent one. Each shows its BIP86 key path, to restore it in another wallet.</p>
 
     <p v-if="accountsLoading" class="hint">Loading…</p>
     <p v-else-if="accountsError" class="error">{{ accountsError }}</p>
@@ -203,7 +203,10 @@ async function confirmImportSeed() {
               </div>
             </template>
             <template v-else>
-              <span class="account-label">{{ acc.label }}</span>
+              <span class="account-label">
+                {{ acc.label }}
+                <span v-if="acc.derivationPath" class="account-path">{{ acc.derivationPath }}</span>
+              </span>
               <div class="account-actions">
                 <span v-if="isActive(acc)" class="success-hint">Active</span>
                 <button
@@ -288,5 +291,6 @@ async function confirmImportSeed() {
 .seed-groups { display: flex; flex-direction: column; gap: 16px; }
 .seed-group-label { font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 6px; }
 .account-label { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--color-text); word-break: break-word; }
+.account-path { display: block; margin-top: 2px; font-family: monospace; font-size: 11px; color: var(--color-text-muted); }
 .account-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 </style>

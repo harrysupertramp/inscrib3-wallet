@@ -14,7 +14,7 @@ PRs are welcome. This is a small, independently maintained project, so response 
 
 ## Donations
 
-**Bitcoin address for donations**: `3GbeGZnnricNemsneqhjEWa9r2JbBRzdyu`
+**Bitcoin address for donations**: `bc1qv8xerenssu3dzphp2kf88wgs5h2ytu8ke2x7yl`
 
 Any amount is appreciated — donations go toward the time spent maintaining this project. Thank you for your support.
 
