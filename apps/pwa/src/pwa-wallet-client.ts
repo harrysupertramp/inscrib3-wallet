@@ -65,7 +65,6 @@ export function createPwaWalletClient(): WalletClient {
     getSpendableVtxos: () => manager.getSpendableVtxos(),
     resetLocalCache: (password) => manager.resetLocalCache(password),
 
-    issueAsset: (amount, metadata, controlAssetId) => manager.issueAsset(amount, metadata, controlAssetId),
 
     signMessage: (message) => manager.signMessage(message),
     exportMnemonic: (password) => manager.exportMnemonic(password),

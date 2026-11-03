@@ -153,20 +153,6 @@ export default defineUnlistedScript(() => {
       return request('arkade_signMessage', { message });
     },
 
-    issueAsset(
-      amount: number,
-      metadata: { name: string; ticker: string; decimals: number },
-      controlAssetId?: string,
-    ): Promise<{ assetId: string; arkTxId: string }> {
-      return request('arkade_issueAsset', { amount, metadata, controlAssetId });
-    },
-    reissueAsset(assetId: string, amount: number): Promise<string> {
-      return request('arkade_reissueAsset', { assetId, amount });
-    },
-    burnAsset(assetId: string, amount: number): Promise<string> {
-      return request('arkade_burnAsset', { assetId, amount });
-    },
-
     // Events: 'accountsChanged' | 'accountChanged' | 'networkChanged' | 'lock' | 'unlock'
     on(eventName: string, callback: (data?: unknown) => void): void {
       if (!_listeners.has(eventName)) _listeners.set(eventName, new Set());

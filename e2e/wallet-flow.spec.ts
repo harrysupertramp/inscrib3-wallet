@@ -20,12 +20,6 @@ declare global {
       ): Promise<string>;
       settle(): Promise<string>;
       signMessage(message: string): Promise<{ message: string; signature: string; address: string }>;
-      issueAsset(
-        amount: number,
-        metadata: { name: string; ticker: string; decimals: number },
-      ): Promise<{ assetId: string; arkTxId: string }>;
-      reissueAsset(assetId: string, amount: number): Promise<string>;
-      burnAsset(assetId: string, amount: number): Promise<string>;
       on(event: string, cb: (data?: unknown) => void): void;
     };
     __accountsChangedEvents: unknown[];
@@ -200,52 +194,6 @@ test.describe.serial('dApp connect / send / broadcast flow', () => {
       await expect(approval.getByText('Sign this message?')).toBeVisible({ timeout: 10_000 });
       await expect(approval.getByText('Sign in to example.com, nonce 42')).toBeVisible();
       await expect(approval.getByText('Mainnet · Account 1')).toBeVisible();
-    });
-  });
-
-  test('issueAsset: approval popup shows the metadata, reject surfaces cleanly', async ({ extensionContext }) => {
-    const approvalPagePromise = extensionContext.waitForEvent('page');
-    await dapp.evaluate(() => {
-      window.__result = window.arkade
-        .issueAsset(1_000_000, { name: 'Test Asset', ticker: 'TST', decimals: 2 })
-        .then((res) => ({ ok: true, value: res }))
-        .catch((e: Error) => ({ ok: false, error: e.message }));
-    });
-
-    await rejectApprovalAndExpectRejection(approvalPagePromise, dapp, async (approval) => {
-      await expect(approval.getByText('Issue new asset?')).toBeVisible({ timeout: 10_000 });
-      await expect(approval.getByText('Test Asset')).toBeVisible();
-      await expect(approval.getByText('TST')).toBeVisible();
-    });
-  });
-
-  test('reissueAsset: approval popup shows the additional supply, reject surfaces cleanly', async ({ extensionContext }) => {
-    const approvalPagePromise = extensionContext.waitForEvent('page');
-    await dapp.evaluate((assetId) => {
-      window.__result = window.arkade
-        .reissueAsset(assetId, 250)
-        .then((txid) => ({ ok: true, value: txid }))
-        .catch((e: Error) => ({ ok: false, error: e.message }));
-    }, FAKE_ASSET_ID);
-
-    await rejectApprovalAndExpectRejection(approvalPagePromise, dapp, async (approval) => {
-      await expect(approval.getByText('Mint more supply?')).toBeVisible({ timeout: 10_000 });
-      await expect(approval.getByText('250')).toBeVisible();
-    });
-  });
-
-  test('burnAsset: approval popup warns before destroying, reject surfaces cleanly', async ({ extensionContext }) => {
-    const approvalPagePromise = extensionContext.waitForEvent('page');
-    await dapp.evaluate((assetId) => {
-      window.__result = window.arkade
-        .burnAsset(assetId, 100)
-        .then((txid) => ({ ok: true, value: txid }))
-        .catch((e: Error) => ({ ok: false, error: e.message }));
-    }, FAKE_ASSET_ID);
-
-    await rejectApprovalAndExpectRejection(approvalPagePromise, dapp, async (approval) => {
-      await expect(approval.getByText('Burn asset?')).toBeVisible({ timeout: 10_000 });
-      await expect(approval.getByText('irreversible', { exact: false })).toBeVisible();
     });
   });
 

@@ -7,18 +7,12 @@ import { AssetService } from './asset-service.js';
 function mockWallet(overrides: {
   assets?: Array<{ assetId: string; amount: bigint }>;
   assetDetails?: (assetId: string) => Promise<{ metadata?: { name?: string; ticker?: string; decimals?: number; icon?: string } }>;
-  issue?: (params: unknown) => Promise<{ assetId: string; arkTxId: string }>;
-  reissue?: (params: unknown) => Promise<string>;
-  burn?: (params: unknown) => Promise<string>;
   txs?: Array<Record<string, unknown>>;
 }) {
   return {
     getBalance: async () => ({ assets: overrides.assets ?? [] }),
     assetManager: {
       getAssetDetails: overrides.assetDetails ?? (async () => ({})),
-      issue: overrides.issue ?? (async () => ({ assetId: 'a1', arkTxId: 'tx1' })),
-      reissue: overrides.reissue ?? (async () => 'tx1'),
-      burn: overrides.burn ?? (async () => 'tx1'),
     },
     getTransactionHistory: async () => overrides.txs ?? [],
   } as unknown as IWallet;
@@ -127,83 +121,6 @@ describe('AssetService.getAssetMetadata', () => {
     });
     const metadata = await service.getAssetMetadata(wallet, 'a1');
     expect(metadata).toBeUndefined();
-  });
-});
-
-describe('AssetService.issue', () => {
-  test('rejects an invalid amount without calling assetManager.issue', async () => {
-    const service = new AssetService();
-    let called = false;
-    const wallet = mockWallet({
-      issue: async () => {
-        called = true;
-        return { assetId: 'a1', arkTxId: 'tx1' };
-      },
-    });
-    await expect(service.issue(wallet, -1)).rejects.toThrow(/Invalid amount/);
-    expect(called).toBe(false);
-  });
-
-  test('rejects an invalid controlAssetId', async () => {
-    const service = new AssetService();
-    const wallet = mockWallet({});
-    await expect(service.issue(wallet, 100, undefined, '   ')).rejects.toThrow(/Invalid controlAssetId/);
-  });
-
-  test('converts amount to BigInt and passes metadata/controlAssetId through', async () => {
-    const service = new AssetService();
-    let receivedParams: unknown;
-    const wallet = mockWallet({
-      issue: async (params) => {
-        receivedParams = params;
-        return { assetId: 'a1', arkTxId: 'tx1' };
-      },
-    });
-    await service.issue(wallet, 500, { ticker: 'CO' }, 'control-1');
-    expect(receivedParams).toEqual({ amount: 500n, metadata: { ticker: 'CO' }, controlAssetId: 'control-1' });
-  });
-});
-
-describe('AssetService.reissue / burn', () => {
-  test('reissue rejects an invalid assetId', async () => {
-    const service = new AssetService();
-    await expect(service.reissue(mockWallet({}), '', 100)).rejects.toThrow(/Invalid assetId/);
-  });
-
-  test('reissue rejects an invalid amount', async () => {
-    const service = new AssetService();
-    await expect(service.reissue(mockWallet({}), 'a1', 0)).rejects.toThrow(/Invalid amount/);
-  });
-
-  test('reissue converts amount to BigInt', async () => {
-    const service = new AssetService();
-    let receivedParams: unknown;
-    const wallet = mockWallet({
-      reissue: async (params) => {
-        receivedParams = params;
-        return 'txid';
-      },
-    });
-    await service.reissue(wallet, 'a1', 250);
-    expect(receivedParams).toEqual({ assetId: 'a1', amount: 250n });
-  });
-
-  test('burn rejects an invalid assetId', async () => {
-    const service = new AssetService();
-    await expect(service.burn(mockWallet({}), '', 100)).rejects.toThrow(/Invalid assetId/);
-  });
-
-  test('burn converts amount to BigInt', async () => {
-    const service = new AssetService();
-    let receivedParams: unknown;
-    const wallet = mockWallet({
-      burn: async (params) => {
-        receivedParams = params;
-        return 'txid';
-      },
-    });
-    await service.burn(wallet, 'a1', 75);
-    expect(receivedParams).toEqual({ assetId: 'a1', amount: 75n });
   });
 });
 

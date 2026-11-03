@@ -34,8 +34,6 @@ export function createExtensionWalletClient(): WalletClient {
     getSpendableVtxos: () => sendToBackground('wallet_getSpendableVtxos'),
     resetLocalCache: (password) => sendToBackground('wallet_resetLocalCache', { password }),
 
-    issueAsset: (amount, metadata, controlAssetId) =>
-      sendToBackground('wallet_issueAsset', { amount, metadata, controlAssetId }),
 
     signMessage: (message) => sendToBackground('wallet_signMessage', { message }),
     exportMnemonic: (password) => sendToBackground('wallet_exportMnemonic', { password }),

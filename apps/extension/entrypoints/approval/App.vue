@@ -8,9 +8,6 @@ type RequestType =
   | 'sendToAddress'
   | 'sendAsset'
   | 'settle'
-  | 'issueAsset'
-  | 'reissueAsset'
-  | 'burnAsset'
   | 'signMessage'
   | 'unknown';
 
@@ -24,8 +21,6 @@ const origin = ref('');
 const address = ref('');
 const amount = ref<number | null>(null);
 const assets = ref<AssetLine[]>([]);
-const assetId = ref('');
-const issueMetadata = ref<{ name?: string; ticker?: string; decimals?: number } | null>(null);
 const message = ref('');
 const network = ref('');
 const account = ref('');
@@ -49,7 +44,6 @@ onMounted(() => {
   address.value = params.get('address') ?? '';
   const amountParam = params.get('amount');
   amount.value = amountParam ? Number(amountParam) : null;
-  assetId.value = params.get('assetId') ?? '';
   message.value = params.get('message') ?? '';
   network.value = params.get('network') ?? '';
   account.value = params.get('account') ?? '';
@@ -60,15 +54,6 @@ onMounted(() => {
       assets.value = JSON.parse(assetsParam);
     } catch {
       assets.value = [];
-    }
-  }
-
-  const metadataParam = params.get('issueMetadata');
-  if (metadataParam) {
-    try {
-      issueMetadata.value = JSON.parse(metadataParam);
-    } catch {
-      issueMetadata.value = null;
     }
   }
 });
@@ -144,57 +129,6 @@ async function respond(approved: boolean) {
       <p class="description">
         This will move your preconfirmed virtual outputs into a settled,
         on-chain-backed state. This broadcasts a real transaction.
-      </p>
-    </template>
-
-    <template v-else-if="requestType === 'issueAsset'">
-      <h1>Issue new asset?</h1>
-      <div class="tx-details">
-        <div class="row" v-if="issueMetadata?.name">
-          <span class="label">Name</span>
-          <span class="value">{{ issueMetadata.name }}</span>
-        </div>
-        <div class="row" v-if="issueMetadata?.ticker">
-          <span class="label">Ticker</span>
-          <span class="value">{{ issueMetadata.ticker }}</span>
-        </div>
-        <div class="row">
-          <span class="label">Initial supply</span>
-          <span class="value">{{ amount !== null ? sats(amount) : '—' }}</span>
-        </div>
-      </div>
-      <p class="description">This will create a new Ark asset owned by your wallet.</p>
-    </template>
-
-    <template v-else-if="requestType === 'reissueAsset'">
-      <h1>Mint more supply?</h1>
-      <div class="tx-details">
-        <div class="row">
-          <span class="label">Asset</span>
-          <span class="value mono">{{ assetId || '—' }}</span>
-        </div>
-        <div class="row">
-          <span class="label">Additional supply</span>
-          <span class="value">{{ amount !== null ? sats(amount) : '—' }}</span>
-        </div>
-      </div>
-      <p class="description">This requires holding the control asset for this asset.</p>
-    </template>
-
-    <template v-else-if="requestType === 'burnAsset'">
-      <h1>Burn asset?</h1>
-      <div class="tx-details danger">
-        <div class="row">
-          <span class="label">Asset</span>
-          <span class="value mono">{{ assetId || '—' }}</span>
-        </div>
-        <div class="row">
-          <span class="label">Amount to destroy</span>
-          <span class="value">{{ amount !== null ? sats(amount) : '—' }}</span>
-        </div>
-      </div>
-      <p class="description warning">
-        This permanently destroys the asset. This action is irreversible.
       </p>
     </template>
 

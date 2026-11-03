@@ -142,22 +142,6 @@ export class BackgroundRouter {
         const { message } = params as { message: string };
         return this.manager.signMessage(message);
       }
-      case 'arkade_issueAsset': {
-        const { amount, metadata, controlAssetId } = params as {
-          amount: number;
-          metadata?: Record<string, unknown>;
-          controlAssetId?: string;
-        };
-        return this.manager.issueAsset(amount, metadata, controlAssetId);
-      }
-      case 'arkade_reissueAsset': {
-        const { assetId, amount } = params as { assetId: string; amount: number };
-        return this.manager.reissueAsset(assetId, amount);
-      }
-      case 'arkade_burnAsset': {
-        const { assetId, amount } = params as { assetId: string; amount: number };
-        return this.manager.burnAsset(assetId, amount);
-      }
       default:
         throw new Error(`Cannot recover approval for unknown method: ${method}`);
     }
@@ -273,15 +257,6 @@ export class BackgroundRouter {
       case 'wallet_getAssetMetadata': {
         const { assetId } = params as { assetId: string };
         return ok(id, await this.manager.getAssetMetadata(assetId));
-      }
-
-      case 'wallet_issueAsset': {
-        const { amount, metadata, controlAssetId } = params as {
-          amount: number;
-          metadata?: Record<string, unknown>;
-          controlAssetId?: string;
-        };
-        return ok(id, await this.manager.issueAsset(amount, metadata, controlAssetId));
       }
 
       // --- Lightning ---
@@ -606,28 +581,6 @@ export class BackgroundRouter {
 
       case 'arkade_settle':
         return this._approveThenPerform(id, { type: 'settle', origin }, method, params, 'User rejected the settlement');
-
-      // --- Asset management ---
-      case 'arkade_issueAsset': {
-        const { amount, metadata } = params as { amount: number; metadata?: Record<string, unknown> };
-        return this._approveThenPerform(
-          id,
-          { type: 'issueAsset', origin, amount, issueMetadata: metadata },
-          method,
-          params,
-          'User rejected the asset issuance',
-        );
-      }
-
-      case 'arkade_reissueAsset': {
-        const { assetId, amount } = params as { assetId: string; amount: number };
-        return this._approveThenPerform(id, { type: 'reissueAsset', origin, assetId, amount }, method, params, 'User rejected the reissuance');
-      }
-
-      case 'arkade_burnAsset': {
-        const { assetId, amount } = params as { assetId: string; amount: number };
-        return this._approveThenPerform(id, { type: 'burnAsset', origin, assetId, amount }, method, params, 'User rejected the burn');
-      }
 
       default:
         return err(id, `Unknown method: ${method}`);

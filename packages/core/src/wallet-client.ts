@@ -76,12 +76,6 @@ export interface WalletClient {
   // Wipes the local VTXO/tx cache and resyncs; never touches the seed.
   resetLocalCache?(password: string): Promise<void>;
 
-  issueAsset(
-    amount: number,
-    metadata?: Record<string, unknown>,
-    controlAssetId?: string,
-  ): Promise<{ assetId: string; arkTxId: string }>;
-
   signMessage?(message: string): Promise<SignedMessage>;
 
   exportMnemonic(password: string): Promise<string>;

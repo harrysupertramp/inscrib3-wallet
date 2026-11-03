@@ -1,6 +1,5 @@
 import type { IWallet } from '@arkade-os/sdk';
 import { toHistoryEntry, type TxHistoryEntry } from './tx-history.js';
-import { assertValidAddress, assertValidAmount } from './validation.js';
 
 // An assetId is the 32-byte genesis txid followed by a 2-byte group index.
 function genesisTxidFromAssetId(assetId: string): string {
@@ -62,29 +61,6 @@ export class AssetService {
         };
       }),
     );
-  }
-
-  async issue(
-    wallet: IWallet,
-    amount: number,
-    metadata?: Record<string, unknown>,
-    controlAssetId?: string,
-  ): Promise<{ assetId: string; arkTxId: string }> {
-    assertValidAmount(amount);
-    if (controlAssetId !== undefined) assertValidAddress(controlAssetId, 'controlAssetId');
-    return wallet.assetManager.issue({ amount: BigInt(amount), metadata, controlAssetId });
-  }
-
-  async reissue(wallet: IWallet, assetId: string, amount: number): Promise<string> {
-    assertValidAddress(assetId, 'assetId');
-    assertValidAmount(amount);
-    return wallet.assetManager.reissue({ assetId, amount: BigInt(amount) });
-  }
-
-  async burn(wallet: IWallet, assetId: string, amount: number): Promise<string> {
-    assertValidAddress(assetId, 'assetId');
-    assertValidAmount(amount);
-    return wallet.assetManager.burn({ assetId, amount: BigInt(amount) });
   }
 
   async getTransactionHistory(wallet: IWallet, assetId: string, lightningTxids: Set<string>): Promise<TxHistoryEntry[]> {

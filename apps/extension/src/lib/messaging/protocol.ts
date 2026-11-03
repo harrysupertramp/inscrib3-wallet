@@ -16,9 +16,6 @@ export const RPC_METHODS = [
   'arkade_sendToAddress',
   'arkade_sendAsset',
   'arkade_settle',
-  'arkade_issueAsset',
-  'arkade_reissueAsset',
-  'arkade_burnAsset',
   'arkade_signMessage',
 ] as const;
 export type RpcMethod = (typeof RPC_METHODS)[number];
@@ -58,7 +55,6 @@ export const INTERNAL_METHODS = [
   'wallet_getAssets',
   'wallet_getAssetMetadata',
   'wallet_sendAsset',
-  'wallet_issueAsset',
   'wallet_getConnectedOrigins',
   'wallet_revokeOrigin',
   'wallet_exportMnemonic',

@@ -703,18 +703,6 @@ export class WalletManager {
     return this.assets.getAssetMetadata(this.getWalletOrThrow(), assetId);
   }
 
-  async issueAsset(amount: number, metadata?: Record<string, unknown>, controlAssetId?: string) {
-    return this.assets.issue(this.getWalletOrThrow(), amount, metadata, controlAssetId);
-  }
-
-  async reissueAsset(assetId: string, amount: number): Promise<string> {
-    return this.assets.reissue(this.getWalletOrThrow(), assetId, amount);
-  }
-
-  async burnAsset(assetId: string, amount: number): Promise<string> {
-    return this.assets.burn(this.getWalletOrThrow(), assetId, amount);
-  }
-
   // A cached network name is only used for the exact same server URL.
   private async resolveNetwork(arkProvider: RestArkProvider, arkServerUrl: string): Promise<string> {
     try {
