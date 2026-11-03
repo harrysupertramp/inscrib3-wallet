@@ -1,0 +1,47 @@
+/* Form styles shared by every settings screen (class on each screen's root). */
+.settings-view .hint { color: var(--color-text-muted); font-size: 12px; line-height: 1.5; }
+.settings-view .hint.warning { color: #e0a030; }
+.settings-view label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #aaa; }
+.settings-view input, .settings-view textarea {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 13px;
+  padding: 10px 12px;
+  width: 100%;
+}
+.settings-view input:focus, .settings-view textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.settings-view textarea { resize: vertical; min-height: 64px; font-family: inherit; }
+.settings-view button {
+  background: var(--color-accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--color-accent-text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px;
+  width: 100%;
+}
+.settings-view button:disabled { opacity: 0.5; cursor: not-allowed; }
+.settings-view button.secondary { background: var(--color-surface-alt); color: var(--color-text); }
+.settings-view button.danger { background: var(--color-error); color: #fff; }
+.settings-view .copy-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--color-surface-alt); border: 1px solid var(--color-border); color: var(--color-text); font-size: 13px; }
+.settings-view .error { color: var(--color-error); font-size: 13px; }
+.settings-view .success-hint { color: var(--color-success); font-size: 12px; }
+.settings-view .origin-list { display: flex; flex-direction: column; gap: 8px; }
+.settings-view .origin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.settings-view .revoke-btn { flex-shrink: 0; width: auto; padding: 6px 12px; font-size: 12px; }

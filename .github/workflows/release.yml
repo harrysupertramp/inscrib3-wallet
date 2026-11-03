@@ -1,0 +1,123 @@
+name: Release
+
+# Every push to main: run CI, then publish the extension as a GitHub Release
+# with the next patch version, and deploy the PWA to GitHub Pages.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two pushes in a row must not pick the same version number.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  extension:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0 # tags, to find the last released version
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          # Pinned - see ci.yml.
+          bun-version: 1.2.9
+
+      # MAJOR.MINOR come from apps/extension/package.json; the patch is one
+      # above the last vMAJOR.MINOR.* tag. Bump MINOR or MAJOR there by hand.
+      - name: Pick the next version
+        id: version
+        run: |
+          base=$(jq -r .version apps/extension/package.json)
+          prefix="${base%.*}"
+          last=$(git tag --list "v${prefix}.*" --sort=-v:refname | head -n1)
+          if [ -z "$last" ]; then
+            next="$base"
+          else
+            next="${prefix}.$(( ${last##*.} + 1 ))"
+          fi
+          echo "version=$next" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$next"
+
+      # WXT takes the manifest version from package.json. Not committed back.
+      - name: Stamp the version
+        run: |
+          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' apps/extension/package.json > package.json.tmp
+          mv package.json.tmp apps/extension/package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build and zip the extension
+        env:
+          # The in-extension update check reads this repo's releases.
+          WXT_RELEASES_REPO: ${{ github.repository }}
+        run: cd apps/extension && bun run build && bun run zip
+
+      - name: Checksum the release
+        run: cd apps/extension/.output && sha256sum *.zip > SHA256SUMS
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          files: |
+            apps/extension/.output/*.zip
+            apps/extension/.output/SHA256SUMS
+          generate_release_notes: true
+
+  pwa-build:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      # <user>.github.io is one origin shared by every Pages site on the
+      # account, and the wallet keeps its encrypted seed in that origin's
+      # storage. Only deploy behind a dedicated custom domain.
+      - name: Require a custom domain
+        if: ${{ vars.PWA_DOMAIN == '' }}
+        run: |
+          echo "::error::Set the PWA_DOMAIN repository variable and configure that domain under Settings > Pages."
+          exit 1
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.2.9
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build PWA
+        run: cd apps/pwa && bun run build
+
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: apps/pwa/dist
+
+  pwa-deploy:
+    needs: pwa-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

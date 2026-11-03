@@ -1,0 +1,12 @@
+node_modules/
+.output/
+.wxt/
+*.local
+dist/
+test-results/
+playwright-report/
+.manual-verify-profile/
+.mainnet-test-profile/
+.DS_Store
+.env
+.etch-state.json

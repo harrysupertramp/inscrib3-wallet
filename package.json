@@ -1,0 +1,19 @@
+{
+  "name": "inscrib3-wallet",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "bun test packages/core packages/ui apps/extension apps/pwa",
+    "typecheck": "bun run --cwd apps/extension typecheck && bun run --cwd apps/pwa typecheck",
+    "build": "bun run --cwd apps/extension build && bun run --cwd apps/pwa build",
+    "e2e": "playwright test --config=e2e/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/chrome": "^0.2.5"
+  }
+}

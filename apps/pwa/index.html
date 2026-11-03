@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Inscrib3</title>
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <style>
+      /* same palette as the extension's index.html files - keep in sync */
+      :root {
+        --color-bg: #000000;
+        --color-surface: #111111;
+        --color-surface-alt: #1a1a1a;
+        --color-border: #453a5f;
+        --color-border-accent: #7458c4;
+        --color-text: #f0f0f0;
+        --color-text-muted: #888888;
+        --color-accent: #7cfb9e;
+        --color-accent-text: #000000;
+        --color-accent-secondary: #8b5cf6;
+        --color-error: #ff6b6b;
+        --color-success: #4caf50;
+      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { min-height: 100vh; font-family: system-ui, sans-serif; background: var(--color-bg); color: var(--color-text); }
+      #app { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+      /* full-bleed on phones, a centered card on wider screens */
+      @media (min-width: 640px) {
+        body {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 16px;
+        }
+        #app {
+          width: 100%;
+          /* min-height beats height, so reset it for the card */
+          min-height: 0;
+          height: min(780px, 90vh);
+          border: 1px solid var(--color-border);
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+          display: flex;
+          flex-direction: column;
+        }
+        /* shared screens size themselves to 100vh (right for the popup); size
+           them to the card here instead */
+        #app > * {
+          min-height: 0;
+          height: 100%;
+        }
+        /* Dashboard scrolls its own content area; only Setup/Unlock scroll whole */
+        #app .setup,
+        #app .unlock {
+          overflow-y: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- outside #app so the card sizing rules don't apply to it -->
+    <div id="update-banner"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

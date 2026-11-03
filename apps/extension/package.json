@@ -1,0 +1,26 @@
+{
+  "name": "@inscrib3/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "postinstall": "wxt prepare",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@inscrib3/core": "workspace:*",
+    "@inscrib3/ui": "workspace:*",
+    "vue": "^3.5.40"
+  },
+  "devDependencies": {
+    "@wxt-dev/module-vue": "^1.0.3",
+    "typescript": "^5.8.0",
+    "vue-tsc": "^3.3.7",
+    "wxt": "^0.20.27"
+  }
+}
